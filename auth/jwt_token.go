@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -27,12 +28,19 @@ func Gen_token(name string) (string, error) {
 
 func Validate_token(tokenString string) (string, error) {
 	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
-		return token, nil
-	})
+	keyfunc := func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return "", jwt.ErrInvalidKeyType
+		}
+		return []byte(jwt_secret), nil
+	}
+	token, err := jwt.ParseWithClaims(tokenString, claims, keyfunc)
 	if err != nil || !token.Valid{
 		return "", err
 	}
+
+	// remove in production
+	fmt.Println(fmt.Sprintf("Username: %s has been verified!", claims.Username))
 
 	return claims.Username, nil
 }

@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type User struct {
@@ -35,9 +36,21 @@ func AddUserToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context,
 	}
 
 	coll := client.Database("db").Collection("usergroups")
+	//load usergroup
 	var ug UserGroup
-	coll.FindOne(ctx, UserGroup{GroupName: groupname}).Decode(&ug)
-	_, err := coll.UpdateOne(ctx, UserGroup{GroupName: groupname}, UserGroup{Users: append(ug.Users, username)})
+	err := coll.FindOne(ctx, bson.M{"groupname": groupname}).Decode(&ug)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			coll.InsertOne(ctx, UserGroup{GroupName: groupname})
+		}else{
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+
+	//add user to group
+	addition := bson.M{"$addToSet": bson.M{"users": username}}
+	_, err = coll.UpdateOne(ctx, bson.M{"groupname": groupname}, addition)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -123,6 +136,14 @@ func Handle(ctx context.Context, client *mongo.Client) error {
 
 	http.HandleFunc("/auth/addtogroup", func(w http.ResponseWriter, r *http.Request) {
 		AddUserToGroup(w, r, ctx, client, r.FormValue("groupname"), r.FormValue("username"))
+	})
+
+	http.HandleFunc("/auth/validate", func(w http.ResponseWriter, r *http.Request) {
+		_, err := Validate_token(r.FormValue("token"))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
 	})
 
 	http.ListenAndServe(":8080", nil)
