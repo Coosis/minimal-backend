@@ -14,7 +14,8 @@ type Claims struct {
 
 const jwt_secret = "secret"
 
-func Gen_token(name string) (string, error) {
+// only accessible through login
+func GenToken(name string) (string, error) {
 	claims := Claims{
 		name,
 		jwt.RegisteredClaims{
@@ -26,7 +27,8 @@ func Gen_token(name string) (string, error) {
 	return tokenString, err
 }
 
-func Validate_token(tokenString string) (string, error) {
+// verify token and return username if valid
+func ValidateToken(tokenString string) (string, error) {
 	claims := &Claims{}
 	keyfunc := func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -35,7 +37,7 @@ func Validate_token(tokenString string) (string, error) {
 		return []byte(jwt_secret), nil
 	}
 	token, err := jwt.ParseWithClaims(tokenString, claims, keyfunc)
-	if err != nil || !token.Valid{
+	if err != nil || !token.Valid {
 		return "", err
 	}
 
