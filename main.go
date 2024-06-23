@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/Coosis/minimal-auth/auth"
+	"minimal_backend/auth"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -17,6 +17,6 @@ func main() {
 		panic(err)
 	}
 	defer client.Disconnect(context.TODO())
-
+	auth.
 	http.ListenAndServe(":8080", nil)
 }

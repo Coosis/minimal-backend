@@ -13,7 +13,7 @@ type Claims struct {
 
 const jwt_secret = "secret"
 
-func gen_token(name string) (string, error) {
+func Gen_token(name string) (string, error) {
 	claims := Claims{
 		name,
 		jwt.RegisteredClaims{
@@ -25,7 +25,7 @@ func gen_token(name string) (string, error) {
 	return tokenString, err
 }
 
-func validate_token(tokenString string) (string, error) {
+func Validate_token(tokenString string) (string, error) {
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
 		return token, nil

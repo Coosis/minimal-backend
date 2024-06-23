@@ -20,7 +20,7 @@ type UserGroup struct {
 	Permissions []string `bson:"permissions,omitempty"`
 }
 
-func add_user(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client) {
+func Add_user(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client) {
 	if r.Method != "POST" {
 		msg := fmt.Sprintf("Method not allowed: %s, use POST instead", r.Method)
 		http.Error(w, msg, http.StatusMethodNotAllowed)
@@ -44,7 +44,7 @@ func add_user(w http.ResponseWriter, r *http.Request, ctx context.Context, clien
 	}
 }
 
-func login(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client) {
+func Login(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client) {
 	if r.Method != "POST" {
 		msg := fmt.Sprintf("Method not allowed: %s, use POST instead", r.Method)
 		http.Error(w, msg, http.StatusMethodNotAllowed)
@@ -71,13 +71,13 @@ func login(w http.ResponseWriter, r *http.Request, ctx context.Context, client *
 	w.Write([]byte(token))
 }
 
-func handle(ctx context.Context, client *mongo.Client) error {
+func Handle(ctx context.Context, client *mongo.Client) error {
 	http.HandleFunc("/auth/add", func(w http.ResponseWriter, r *http.Request) {
-		add_user(w, r, ctx, client)
+		Add_user(w, r, ctx, client)
 	})
 
 	http.HandleFunc("/auth/login", func(w http.ResponseWriter, r *http.Request) {
-		login(w, r, ctx, client)
+		Login(w, r, ctx, client)
 	})
 
 	select {
