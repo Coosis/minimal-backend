@@ -1,5 +1,3 @@
-github.com/Coosis/minimal-backend/auth v0.0.0-20240623082451-b1ac1025294c h1:GxohvyAyK+Z4PPhweGY5wj1TYOjY0/8oTlif3K2P3cs=
-github.com/Coosis/minimal-backend/auth v0.0.0-20240623082451-b1ac1025294c/go.mod h1:PHaJtB59aeVih8nuxxfpERtGw3KM5kAqbZwIJbY4Sms=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/golang-jwt/jwt/v5 v5.2.1 h1:OuVbFODueb089Lh128TAcimifWaLhJwVflnrgM17wHk=
