@@ -8,15 +8,28 @@ A backend boilerplate, uses mongodb at localhost:27017 by default.
 # Endpoints?
 1. `POST /auth/add` - Add a user
 ```bash
-curl -X POST http://localhost:8080/auth/add -d 'username=test' -d 'pswdhash=testhash'
+curl -X POST http://localhost:8080/auth/add \
+    -d 'username=test' \
+    -d 'pswdhash=testhash'
 ```
 2. `POST /auth/login` - Login, returns a JWT token with a 24 hour expiry
 ```bash
-curl -X POST http://localhost:8080/auth/login -d 'username=test' -d 'pswdhash=testhash'
+curl -X POST http://localhost:8080/auth/login \
+    -d 'username=test' \
+    -d 'pswdhash=testhash'
 ```
 3. `POST /auth/addtogroup` - Add a user to a group
 ```bash
-curl -X POST http://localhost:8080/auth/addtogroup -H 'Authorization: bearer admintoken' -d 'groupname=testgroup' -d 'username=test'
+curl -X POST http://localhost:8080/auth/addtogroup \
+    -H 'Authorization: bearer admintoken' \
+    -d 'groupname=testgroup' \
+    -d 'username=test'
+```
+4. `POST /auth/createadmin` - Create an admin user(only accessible through localhost)
+```bash
+curl -X POST http://localhost:8080/auth/createadmin \
+    -d 'username=admin' \
+    -d 'pswdhash=adminhash'
 ```
 
 # Database structure

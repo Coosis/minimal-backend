@@ -29,11 +29,13 @@ type UserGroup struct {
 	Permissions []string `bson:"permissions,omitempty"`
 }
 
-func CreateAdmin(ctx context.Context, client *mongo.Client, username string, hash string) error {
+func CreateAdmin(ctx context.Context, client *mongo.Client, w http.ResponseWriter, r *http.Request) error {
+	username := r.FormValue("username")
+	hash := r.FormValue("pswdhash")
+
 	coll := client.Database("db").Collection("groups")
 
 	// create admin group if it doesn't exist
-	ug := UserGroup{}
 	singleResult := coll.FindOne(ctx, bson.M{"groupname": "admin"})
 	err := singleResult.Err()
 	if err != nil {
@@ -46,10 +48,10 @@ func CreateAdmin(ctx context.Context, client *mongo.Client, username string, has
 		}
 	}
 
-	// stop if admin group already has users
-	singleResult.Decode(&ug)
-	if ug.Users != nil {
-		fmt.Println("Admin already exists")
+	//stop if user already exists
+	exists, _ := UserExists(ctx, client, username)
+	if exists {
+		http.Error(w, "User already exists", http.StatusConflict)
 		return nil
 	}
 
@@ -187,6 +189,16 @@ func Login(w http.ResponseWriter, r *http.Request, ctx context.Context, client *
 }
 
 func Handle(ctx context.Context, client *mongo.Client) error {
+	go func() {
+		http.HandleFunc("/auth/createadmin", func(w http.ResponseWriter, r *http.Request) {
+			err := CreateAdmin(ctx, client, w, r)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		})
+		http.ListenAndServe("http://localhost:8081", nil)
+	}()
+
 	http.HandleFunc("/auth/add", func(w http.ResponseWriter, r *http.Request) {
 		AddUser(w, r, ctx, client)
 	})
@@ -196,15 +208,14 @@ func Handle(ctx context.Context, client *mongo.Client) error {
 	})
 
 	http.HandleFunc("/auth/addtogroup", func(w http.ResponseWriter, r *http.Request) {
-		admin, err := OnlyAdmin(w, r, ctx, client)
+		cle, err := RightWall(r, ctx, client, "addtogroup")
+		if !cle {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
 		if err != nil {
 			fmt.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if !admin {
-			fmt.Println(err)
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 

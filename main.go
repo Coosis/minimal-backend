@@ -16,6 +16,5 @@ func main() {
 		panic(err)
 	}
 	defer client.Disconnect(context.TODO())
-	// auth.CreateAdmin(context.TODO(), client, "__", "1234")
 	auth.Handle(context.TODO(), client)
 }

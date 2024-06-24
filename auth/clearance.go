@@ -36,44 +36,46 @@ func (u *User) GetPerm(ctx context.Context, client *mongo.Client) ([]string, err
 	return perms, nil
 }
 
-// given a token, verify that the user is an admin by checking the database
-func VerifyAdmin(ctx context.Context, client *mongo.Client, token string) (bool, error) {
+func RightWall(r *http.Request, ctx context.Context, client *mongo.Client, right string) (bool, error) {
+	token := r.Header.Get("Authorization")
+	token = token[7:]
+	if token == "" {
+		return false, nil
+	}
+
 	// valid token
 	username, err := ValidateToken(token)
 	if err != nil {
 		return false, err
 	}
 
-	// existing user
-	exists, user := UserExists(ctx, client, username)
-	if !exists {
-		return false, nil
-	}
-
-	// has admin group
-	for _, group := range user.UserGroup {
-		if group == "admin" {
-			return true, nil
-		}
-	}
-	return false, nil
-}
-
-func OnlyAdmin(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client) (bool, error) {
-	token := r.Header.Get("Authorization")
-	fmt.Println(fmt.Sprintf("Token: %s", token))
-	if token == "" {
-		return false, nil
-	}
-	// usually the token is in the form "Bearer:<token>"
-	// so we remove the first 7 characters
-	token = token[7:]
-
-	isAdmin, err := VerifyAdmin(ctx, client, token)
-	if err != nil && !isAdmin {
+	// get user
+	user := User{}
+	coll := client.Database("db").Collection("users")
+	err = coll.FindOne(ctx, bson.M{"username": username}).Decode(&user)
+	if err != nil {
 		return false, err
 	}
 
-	return true, nil
-}
+	// admin has all rights
+	for _, groupname := range user.UserGroup {
+		if groupname == "admin" {
+			return true, nil
+		}
+	}
 
+	// get permissions
+	perms, err := user.GetPerm(ctx, client)
+	if err != nil {
+		return false, err
+	}
+
+	// check if user has the right
+	for _, perm := range perms {
+		if perm == right {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
