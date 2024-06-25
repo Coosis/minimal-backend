@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"encoding/json"
+	"log"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -12,8 +13,6 @@ import (
 // CreateAdmin: Create an admin user
 // AddUser: Add a new user to the database
 // DeleteUser: Delete a user from the database
-// AddUserToGroup: Add a user to a group
-// RemoveUserFromGroup: Remove a user from a group
 
 type Response struct {
 	Message string `json:"message"`
@@ -28,7 +27,8 @@ func UserExists(ctx context.Context, client *mongo.Client, username string) (boo
 		if err == mongo.ErrNoDocuments {
 			return false, user
 		}
-		fmt.Println(err)
+
+		log.Println(err)
 	}
 	return true, user
 }
@@ -45,10 +45,10 @@ func CreateAdmin(ctx context.Context, client *mongo.Client, w http.ResponseWrite
 	err := singleResult.Err()
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			fmt.Println("Admin group not found, creating...")
+			log.Println("Admin group not found, creating...")
 			coll.InsertOne(ctx, UserGroup{GroupName: "admin"})
 		} else {
-			fmt.Println(err)
+			log.Println(err)
 			return err
 		}
 	}
@@ -69,7 +69,7 @@ func CreateAdmin(ctx context.Context, client *mongo.Client, w http.ResponseWrite
 	coll = client.Database("db").Collection("users")
 	_, err = coll.InsertOne(ctx, user)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 
@@ -78,11 +78,11 @@ func CreateAdmin(ctx context.Context, client *mongo.Client, w http.ResponseWrite
 	query := bson.M{"$addToSet": bson.M{"users": username}}
 	_, err2 := coll.UpdateOne(ctx, bson.M{"groupname": "admin"}, query)
 	if err2 != nil {
-		fmt.Println(err2)
+		log.Println(err2)
 		return err2
 	}
 
-	fmt.Println("Admin user created: " + username)
+	log.Printf("Admin user %s created\n", username)
 	return nil
 }
 
@@ -120,14 +120,11 @@ func AddUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client
 	}
 	_, err := coll.InsertOne(ctx, user)
 
-	//remove in production
-	fmt.Println("User added:")
-	fmt.Println(user)
+	log.Printf("User %s added\n", name)
 
 	for _, group := range groups {
 		AddUserToGroup(w, r, ctx, client, group, name)
-		//remove in production
-		fmt.Println("User added to group: " + group)
+		log.Printf("User %s added to group %s\n", name, group)
 	}
 
 	if err != nil {
@@ -135,7 +132,7 @@ func AddUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client
 		return
 	}
 
-	response := Response{Message: "User added"}
+	response := Response{Message: fmt.Sprintf("User %s added", name)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -145,8 +142,8 @@ func AddUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client, username string) {
-	if r.Method != "DELETE" {
-		msg := fmt.Sprintf("Method not allowed: %s, use DELETE instead", r.Method)
+	if r.Method != "POST" {
+		msg := fmt.Sprintf("Method not allowed: %s, use POST instead", r.Method)
 		http.Error(w, msg, http.StatusMethodNotAllowed)
 		return
 	}
@@ -162,12 +159,11 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, ctx context.Context, cli
 	removal := bson.M{"$pull": bson.M{"users": username}}
 	_, err = coll.UpdateMany(ctx, bson.M{"users": username}, removal)
 
-	//remove in production
-	fmt.Println("User deleted: " + username)
+	log.Printf("User %s deleted\n", username)
 
-	response := Response{Message: "User deleted"}
+	response := Response{Message: fmt.Sprintf("User %s deleted", username)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

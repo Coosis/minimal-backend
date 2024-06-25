@@ -1,8 +1,8 @@
 package auth
 
 import (
-	"fmt"
 	"time"
+	"log"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -41,8 +41,7 @@ func ValidateToken(tokenString string) (string, error) {
 		return "", err
 	}
 
-	// remove in production
-	fmt.Println(fmt.Sprintf("Username: %s has been verified!", claims.Username))
+	log.Printf("Username: %s has been verified!", claims.Username)
 
 	return claims.Username, nil
 }

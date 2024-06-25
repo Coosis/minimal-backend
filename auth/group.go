@@ -2,6 +2,7 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"encoding/json"
 
@@ -51,8 +52,7 @@ func AddUserToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context,
 		return
 	}
 
-	//remove in production
-	fmt.Println("User added to group: " + groupname)
+	log.Printf("User %s added to group %s\n", username, groupname)
 
 	response := Response{Message: fmt.Sprintf("User %s added to group %s", username, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -64,8 +64,8 @@ func AddUserToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context,
 }
 
 func RemoveUserFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client, groupname string, username string) {
-	if r.Method != "DELETE" {
-		msg := fmt.Sprintf("Method not allowed: %s, use DELETE instead", r.Method)
+	if r.Method != "POST" {
+		msg := fmt.Sprintf("Method not allowed: %s, use POST instead", r.Method)
 		http.Error(w, msg, http.StatusMethodNotAllowed)
 		return
 	}
@@ -88,12 +88,11 @@ func RemoveUserFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Con
 		return
 	}
 
-	//remove in production
-	fmt.Println("User removed from group: " + groupname)
+	log.Printf("User %s removed from group %s\n", username, groupname)
 
 	response := Response{Message: fmt.Sprintf("User %s removed from group %s", username, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -116,8 +115,7 @@ func AddRightToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context
 		return
 	}
 
-	//remove in production
-	fmt.Println("Right added to group: " + groupname)
+	log.Printf("Right %s added to group: %s\n", right, groupname)
 
 	response := Response{Message: fmt.Sprintf("Right %s added to group %s", right, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -129,8 +127,8 @@ func AddRightToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context
 }
 
 func RemoveRightFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client, groupname string, right string) {
-	if r.Method != "DELETE" {
-		msg := fmt.Sprintf("Method not allowed: %s, use DELETE instead", r.Method)
+	if r.Method != "POST" {
+		msg := fmt.Sprintf("Method not allowed: %s, use POST instead", r.Method)
 		http.Error(w, msg, http.StatusMethodNotAllowed)
 		return
 	}
@@ -144,12 +142,11 @@ func RemoveRightFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Co
 		return
 	}
 
-	//remove in production
-	fmt.Println("Right removed from group: " + groupname)
+	log.Printf("Right %s removed from group: %s\n", right, groupname)
 
 	response := Response{Message: fmt.Sprintf("Right %s removed from group %s", right, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
