@@ -167,7 +167,7 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, ctx context.Context, cli
 
 	response := Response{Message: "User deleted"}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

@@ -93,7 +93,7 @@ func RemoveUserFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Con
 
 	response := Response{Message: fmt.Sprintf("User %s removed from group %s", username, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -149,7 +149,7 @@ func RemoveRightFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Co
 
 	response := Response{Message: fmt.Sprintf("Right %s removed from group %s", right, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Methods", "DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
