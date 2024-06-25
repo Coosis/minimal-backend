@@ -3,6 +3,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"encoding/json"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,12 +15,22 @@ import (
 // AddUserToGroup: Add a user to a group
 // RemoveUserFromGroup: Remove a user from a group
 
+type Response struct {
+	Message string `json:"message"`
+}
+
 // whether a user exists, if so return the user
 func UserExists(ctx context.Context, client *mongo.Client, username string) (bool, User) {
 	coll := client.Database("db").Collection("users")
 	var user User
 	err := coll.FindOne(ctx, User{UserName: username}).Decode(&user)
-	return err == nil, user
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, user
+		}
+		fmt.Println(err)
+	}
+	return true, user
 }
 
 // create an admin user
@@ -70,6 +81,8 @@ func CreateAdmin(ctx context.Context, client *mongo.Client, w http.ResponseWrite
 		fmt.Println(err2)
 		return err2
 	}
+
+	fmt.Println("Admin user created: " + username)
 	return nil
 }
 
@@ -83,6 +96,11 @@ func AddUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client
 	// check whether user already exists
 	coll := client.Database("db").Collection("users")
 	name := r.FormValue("username")
+	if name == "" {
+		http.Error(w, "Username not provided", http.StatusBadRequest)
+		return
+	}
+
 	exists, _ := UserExists(ctx, client, name)
 	if exists {
 		http.Error(w, "User already exists", http.StatusConflict)
@@ -90,6 +108,10 @@ func AddUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client
 	}
 
 	hash := r.FormValue("pswdhash")
+	if hash == "" {
+		http.Error(w, "Password hash not provided", http.StatusBadRequest)
+		return
+	}
 	groups := r.Form["usergroup"]
 	user := User{
 		UserName:  name,
@@ -112,6 +134,14 @@ func AddUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	response := Response{Message: "User added"}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 func DeleteUser(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client, username string) {
@@ -134,4 +164,12 @@ func DeleteUser(w http.ResponseWriter, r *http.Request, ctx context.Context, cli
 
 	//remove in production
 	fmt.Println("User deleted: " + username)
+
+	response := Response{Message: "User deleted"}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }

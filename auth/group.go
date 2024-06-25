@@ -3,6 +3,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"encoding/json"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -52,6 +53,14 @@ func AddUserToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context,
 
 	//remove in production
 	fmt.Println("User added to group: " + groupname)
+
+	response := Response{Message: fmt.Sprintf("User %s added to group %s", username, groupname)}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 func RemoveUserFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client, groupname string, username string) {
@@ -81,6 +90,14 @@ func RemoveUserFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Con
 
 	//remove in production
 	fmt.Println("User removed from group: " + groupname)
+
+	response := Response{Message: fmt.Sprintf("User %s removed from group %s", username, groupname)}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 func AddRightToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client, groupname string, right string) {
@@ -101,6 +118,14 @@ func AddRightToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context
 
 	//remove in production
 	fmt.Println("Right added to group: " + groupname)
+
+	response := Response{Message: fmt.Sprintf("Right %s added to group %s", right, groupname)}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }
 
 func RemoveRightFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client, groupname string, right string) {
@@ -121,4 +146,12 @@ func RemoveRightFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Co
 
 	//remove in production
 	fmt.Println("Right removed from group: " + groupname)
+
+	response := Response{Message: fmt.Sprintf("Right %s removed from group %s", right, groupname)}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
 }

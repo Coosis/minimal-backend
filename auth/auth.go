@@ -2,11 +2,13 @@ package auth
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
 // Login: Log in a user and return a jwt token
 // Handle: listen and serve
 
@@ -20,6 +22,11 @@ type UserGroup struct {
 	GroupName   string   `bson:"groupname,omitempty"`
 	Users       []string `bson:"users,omitempty"`
 	Permissions []string `bson:"permissions,omitempty"`
+}
+
+type LoginResponse struct {
+	UserName string `json:"username"`
+	Token    string `json:"token"`
 }
 
 func Login(w http.ResponseWriter, r *http.Request, ctx context.Context, client *mongo.Client) {
@@ -46,8 +53,14 @@ func Login(w http.ResponseWriter, r *http.Request, ctx context.Context, client *
 		return
 	}
 
-	w.Write([]byte(token))
-	fmt.Println("User logged in: " + name)
+	response := LoginResponse{UserName: user.UserName, Token: token}
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response)
+	fmt.Println("User logged in: " + user.UserName)
 }
 
 func Handle(ctx context.Context, client *mongo.Client) error {
