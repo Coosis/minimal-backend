@@ -1,14 +1,16 @@
 package auth
+
 import (
 	"context"
-	"fmt"
-	"net/http"
 	"encoding/json"
+	"fmt"
 	"log"
+	"net/http"
 
-	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 )
+
 // UserExists: Check whether a user exists
 // CreateAdmin: Create an admin user
 // AddUser: Add a new user to the database

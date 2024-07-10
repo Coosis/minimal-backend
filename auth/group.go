@@ -2,9 +2,11 @@ package auth
 import (
 	"context"
 	"fmt"
-	"log"
+	// "log"
 	"net/http"
 	"encoding/json"
+
+	l "github.com/Coosis/minimal-backend/logger"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -52,7 +54,7 @@ func AddUserToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context,
 		return
 	}
 
-	log.Printf("User %s added to group %s\n", username, groupname)
+	l.Logchan <- fmt.Sprintf("User %s added to group %s\n", username, groupname)
 
 	response := Response{Message: fmt.Sprintf("User %s added to group %s", username, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -88,7 +90,7 @@ func RemoveUserFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Con
 		return
 	}
 
-	log.Printf("User %s removed from group %s\n", username, groupname)
+	l.Logchan <- fmt.Sprintf("User %s removed from group %s\n", username, groupname)
 
 	response := Response{Message: fmt.Sprintf("User %s removed from group %s", username, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -115,7 +117,7 @@ func AddRightToGroup(w http.ResponseWriter, r *http.Request, ctx context.Context
 		return
 	}
 
-	log.Printf("Right %s added to group: %s\n", right, groupname)
+	l.Logchan <- fmt.Sprintf("Right %s added to group: %s\n", right, groupname)
 
 	response := Response{Message: fmt.Sprintf("Right %s added to group %s", right, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -142,7 +144,7 @@ func RemoveRightFromGroup(w http.ResponseWriter, r *http.Request, ctx context.Co
 		return
 	}
 
-	log.Printf("Right %s removed from group: %s\n", right, groupname)
+	l.Logchan <- fmt.Sprintf("Right %s removed from group: %s\n", right, groupname)
 
 	response := Response{Message: fmt.Sprintf("Right %s removed from group %s", right, groupname)}
 	w.Header().Set("Access-Control-Allow-Origin", "*")

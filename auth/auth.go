@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"log"
 
+	l "github.com/Coosis/minimal-backend/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -61,7 +61,7 @@ func Login(w http.ResponseWriter, r *http.Request, ctx context.Context, client *
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(response)
-	log.Printf("User %s logged in\n", user.UserName)
+	l.Logchan <- fmt.Sprintf("User %s logged in\n", user.UserName)
 }
 
 func Handle(ctx context.Context, client *mongo.Client) error {
@@ -86,7 +86,7 @@ func Handle(ctx context.Context, client *mongo.Client) error {
 			return
 		}
 		if err != nil {
-			log.Println(err)
+			l.Logchan <- err.Error()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -105,7 +105,7 @@ func Handle(ctx context.Context, client *mongo.Client) error {
 			return
 		}
 		if err != nil {
-			log.Println(err)
+			l.Logchan <- err.Error()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -120,7 +120,7 @@ func Handle(ctx context.Context, client *mongo.Client) error {
 			return
 		}
 		if err != nil {
-			log.Println(err)
+			l.Logchan <- err.Error()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -135,7 +135,7 @@ func Handle(ctx context.Context, client *mongo.Client) error {
 			return
 		}
 		if err != nil {
-			log.Println(err)
+			l.Logchan <- err.Error()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -150,7 +150,7 @@ func Handle(ctx context.Context, client *mongo.Client) error {
 			return
 		}
 		if err != nil {
-			log.Println(err)
+			l.Logchan <- err.Error()
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}

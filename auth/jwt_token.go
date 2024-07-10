@@ -2,8 +2,8 @@ package auth
 
 import (
 	"time"
-	"log"
 
+	l "github.com/Coosis/minimal-backend/logger"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -41,7 +41,7 @@ func ValidateToken(tokenString string) (string, error) {
 		return "", err
 	}
 
-	log.Printf("Username: %s has been verified!", claims.Username)
+	l.Logchan <- "Username: " + claims.Username + " has been verified!"
 
 	return claims.Username, nil
 }

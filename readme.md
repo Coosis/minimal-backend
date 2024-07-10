@@ -138,3 +138,6 @@ db
 |   |-users
 |   |-permissions
 ```
+
+# Logging
+`logger` module is used for logging, log entries are of the spec `date time file:line message`, all logs are written to `logs.log` file, as well as stdout.

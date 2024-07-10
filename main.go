@@ -2,25 +2,24 @@ package main
 
 import (
 	"context"
-	"log"
 
 	"os"
 	"os/signal"
 	"syscall"
 
-	"github.com/Coosis/minimal-backend/logger"
 	"github.com/Coosis/minimal-backend/auth"
+	l "github.com/Coosis/minimal-backend/logger"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
-	log.Println("Starting server...")
-	defer logger.LogFile.Close()
+	go l.LogHandler()
+	l.Logchan <- "Starting server..."
 
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI("mongodb://localhost:27017"))
 	if err != nil {
-		log.Println("Error while connecting to MongoDB!")
+		l.Logchan <- "Error while connecting to MongoDB!"
 		panic(err)
 	}
 	defer client.Disconnect(context.TODO())
@@ -33,5 +32,5 @@ func main() {
 	}()
 
 	<-sigc
-	log.Println("Shutting down server...")
+	l.Logchan <- "Shutting down server..."
 }
